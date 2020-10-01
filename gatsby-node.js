@@ -29,6 +29,36 @@ exports.createPages = ({ graphql, actions }) => {
           }
         }
       }
+
+      prismic {
+        allBlog_content_models {
+          edges {
+            node {
+              post_title
+              release_date
+              _linkType
+              body {
+                ... on PRISMIC_Blog_content_modelBodyDynamic_content {
+                  type
+                  label
+                }
+                ... on PRISMIC_Blog_content_modelBodyImage {
+                  type
+                  label
+                }
+                ... on PRISMIC_Blog_content_modelBodyShopify_store {
+                  type
+                  label
+                  primary {
+                    shopify_store
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
     }
   `).then((result) => {
     result.data.allShopifyProduct.edges.forEach(({ node }) => {
@@ -67,5 +97,14 @@ exports.createPages = ({ graphql, actions }) => {
         },
       });
     });
+      result.data.allBlog_content_models.edges.forEach(({ node }) => {
+        createPage({
+          path: `/blog/${node.uid}/`,
+          component: path.resolve(`./src/templates/blog.tsx`),
+          context: {
+            uid: node.uid,
+          },
+        });
+      });
   });
 };
